@@ -74,12 +74,12 @@ class YahooExchange extends BaseExchange {
     }
 
     let result;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 5; attempt++) {
       try {
         result = await yf.chart(yahooSymbol, { period1, interval: yfInterval });
         break;
       } catch (e) {
-        if (attempt < 2) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        if (attempt < 4) await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
         else throw e;
       }
     }
@@ -108,12 +108,12 @@ class YahooExchange extends BaseExchange {
     if (cached) return cached;
 
     let quote;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 5; attempt++) {
       try {
         quote = await yf.quote(yahooSymbol);
         break;
       } catch (e) {
-        if (attempt < 2) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        if (attempt < 4) await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
         else throw e;
       }
     }
@@ -131,12 +131,12 @@ class YahooExchange extends BaseExchange {
     if (cached) return cached;
 
     let quote;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 5; attempt++) {
       try {
         quote = await yf.quote(yahooSymbol);
         break;
       } catch (e) {
-        if (attempt < 2) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        if (attempt < 4) await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
         else throw e;
       }
     }
