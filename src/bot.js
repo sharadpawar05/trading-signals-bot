@@ -171,6 +171,8 @@ Advanced multi-timeframe analysis with 12+ indicators, order book data, candlest
 /bse TCS - BSE stock signal
 /india - NIFTY 50 + Bank Nifty overview
 /indiascan - Scan top NSE stocks
+/fno NIFTY - NIFTY F&O analysis
+/fno BANKNIFTY - Bank Nifty F&O analysis
 
 *Tracking & Filters:*
 /history - View your signal history
@@ -655,6 +657,76 @@ ${premium ? `*Expires:* ${new Date(userData.premiumExpiresAt).toLocaleDateString
 
     setMinConfidence(userId, level);
     ctx.reply(`✅ Minimum confidence set to ${level}%\n\nSignals below this threshold will be filtered out.`);
+  });
+
+  bot.command('fno', async (ctx) => {
+    const userId = ctx.from.id;
+    const args = ctx.message.text.split(' ');
+    const symbol = args[1]?.toUpperCase();
+
+    if (!symbol) {
+      return ctx.reply(
+        `*Usage:* /fno <symbol>\n\n*Available:*\n` +
+        `/fno NIFTY - NIFTY 50 F&O analysis\n` +
+        `/fno BANKNIFTY - Bank Nifty F&O analysis\n` +
+        `/fno NIFTY25000CE - Nifty 25000 Call Option\n` +
+        `/fno NIFTY24500PE - Nifty 24500 Put Option`,
+        { parse_mode: 'Markdown' }
+      );
+    }
+
+    // Map common F&O symbols to Yahoo Finance symbols
+    const fnoMap = {
+      'NIFTY': '^NSEI',
+      'NIFTY50': '^NSEI',
+      'BANKNIFTY': '^NSEBANK',
+      'BANK': '^NSEBANK',
+      'SENSEX': '^BSESN',
+    };
+
+    const yahooSymbol = fnoMap[symbol] || symbol;
+
+    if (!isPremium(userId)) {
+      const used = getDailyUsage(userId);
+      if (used >= FREE_SIGNALS_PER_DAY) {
+        return ctx.reply(
+          `⚠️ *Daily limit reached!*\n\nYou've used ${FREE_SIGNALS_PER_DAY}/${FREE_SIGNALS_PER_DAY} free signals today.\n\nUpgrade to premium for unlimited access:`,
+          {
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+              [Markup.button.url('Upgrade Premium 💎', 'https://your-payment-link.com')],
+            ]),
+          }
+        );
+      }
+    }
+
+    try {
+      await ctx.reply('⏳ Analyzing F&O data...');
+      const minConfidence = getMinConfidence(userId);
+      const signal = await generateSignal(yahooSymbol, 'nse', minConfidence);
+
+      if (!signal) {
+        return ctx.reply(`⚠️ Signal doesn't meet your minimum confidence threshold (${minConfidence}%). Use /setconfidence to adjust.`);
+      }
+
+      saveSignal(userId, signal);
+      incrementDailyUsage(userId);
+      incrementUsage(userId);
+
+      const keyboard = isPremium(userId)
+        ? {}
+        : Markup.inlineKeyboard([
+            [Markup.button.url('Get Premium 🔓', 'https://your-payment-link.com')],
+          ]);
+
+      ctx.reply(formatSignal(signal), {
+        parse_mode: 'Markdown',
+        ...keyboard,
+      });
+    } catch (error) {
+      ctx.reply(`❌ Error: ${error.message}`);
+    }
   });
 
   return bot;
