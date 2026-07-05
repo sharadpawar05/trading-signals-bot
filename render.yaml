@@ -1,0 +1,12 @@
+services:
+  - type: worker
+    name: trading-signals-bot
+    runtime: node
+    plan: free
+    buildCommand: yarn install
+    startCommand: node index.js
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ACTIVATION_CODES
+        sync: false
