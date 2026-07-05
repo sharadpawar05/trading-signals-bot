@@ -1,0 +1,29 @@
+{
+  "name": "trading-signals-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "crypto",
+    "trading",
+    "signals"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Telegram bot that provides AI-powered crypto trading signals",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "node-fetch": "^2.7.0",
+    "technicalindicators": "^3.1.0",
+    "telegraf": "^4.16.3",
+    "yahoo-finance2": "^3.15.4"
+  }
+}
