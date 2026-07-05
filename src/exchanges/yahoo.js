@@ -73,10 +73,16 @@ class YahooExchange extends BaseExchange {
       period1 = new Date(Date.now() - Math.max(days, 200) * 24 * 60 * 60 * 1000);
     }
 
-    const result = await yf.chart(yahooSymbol, {
-      period1,
-      interval: yfInterval,
-    });
+    let result;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        result = await yf.chart(yahooSymbol, { period1, interval: yfInterval });
+        break;
+      } catch (e) {
+        if (attempt < 2) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        else throw e;
+      }
+    }
 
     const klines = result.quotes
       .filter(q => q.open != null && q.close != null)
@@ -101,9 +107,18 @@ class YahooExchange extends BaseExchange {
     const cached = getCached(cacheKey);
     if (cached) return cached;
 
-    const quote = await yf.quote(yahooSymbol);
-    const price = quote.regularMarketPrice;
+    let quote;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        quote = await yf.quote(yahooSymbol);
+        break;
+      } catch (e) {
+        if (attempt < 2) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        else throw e;
+      }
+    }
 
+    const price = quote.regularMarketPrice;
     setCache(cacheKey, price);
     return price;
   }
@@ -115,7 +130,16 @@ class YahooExchange extends BaseExchange {
     const cached = getCached(cacheKey);
     if (cached) return cached;
 
-    const quote = await yf.quote(yahooSymbol);
+    let quote;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        quote = await yf.quote(yahooSymbol);
+        break;
+      } catch (e) {
+        if (attempt < 2) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        else throw e;
+      }
+    }
 
     const stats = {
       price: quote.regularMarketPrice,
